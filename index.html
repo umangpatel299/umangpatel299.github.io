@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Umang Patel // Cybersecurity Analyst</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green: #00ff41;
+  --green-dim: #00cc33;
+  --green-dark: #003311;
+  --green-glow: rgba(0,255,65,0.15);
+  --bg: #020a02;
+  --bg2: #040f04;
+  --red: #ff0033;
+  --amber: #ffaa00;
+  --white: #e0ffe0;
+  --grey: #1a2e1a;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { background:var(--bg); color:var(--green); font-family:'Share Tech Mono',monospace; overflow-x:hidden; cursor:crosshair; }
+body::before { content:''; position:fixed; top:0; left:0; width:100%; height:100%; background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.13) 2px,rgba(0,0,0,0.13) 4px); pointer-events:none; z-index:9999; }
+#matrix-canvas { position:fixed; top:0; left:0; width:100%; height:100%; opacity:0.045; pointer-events:none; z-index:0; }
+::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:var(--bg)} ::-webkit-scrollbar-thumb{background:var(--green-dim)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes fillBar{from{width:0 !important}}
+@keyframes glitch1{0%,90%,100%{transform:translateX(0);opacity:0}92%{transform:translateX(-3px);opacity:0.8}94%{transform:translateX(3px);opacity:0.8}96%{transform:translateX(0);opacity:0}}
+@keyframes glitch2{0%,90%,100%{transform:translateX(0);opacity:0}91%{transform:translateX(3px);opacity:0.8}93%{transform:translateX(-3px);opacity:0.8}95%{transform:translateX(0);opacity:0}}
+
+/* NAV */
+nav { position:fixed; top:0; left:0; right:0; z-index:1000; background:rgba(2,10,2,0.93); border-bottom:1px solid var(--green-dim); padding:0 2rem; display:flex; align-items:center; justify-content:space-between; height:56px; backdrop-filter:blur(8px); }
+.nav-logo { font-family:'Orbitron',monospace; font-weight:900; font-size:1rem; color:var(--green); text-shadow:0 0 10px var(--green); letter-spacing:2px; }
+.nav-logo span { color:var(--red); }
+nav ul { list-style:none; display:flex; gap:1.5rem; flex-wrap:wrap; }
+nav ul a { color:var(--green-dim); text-decoration:none; font-size:0.72rem; letter-spacing:2px; text-transform:uppercase; transition:all 0.2s; }
+nav ul a:hover { color:var(--green); text-shadow:0 0 8px var(--green); }
+.nav-status { display:flex; align-items:center; gap:0.5rem; font-size:0.65rem; color:var(--green-dim); }
+.status-dot { width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 6px var(--green); animation:pulse 2s infinite; }
+
+/* COMMON */
+section { position:relative; z-index:1; min-height:100vh; padding:5rem 0 4rem; }
+.container { max-width:1100px; margin:0 auto; padding:0 2rem; }
+.section-header { margin-bottom:3rem; display:flex; align-items:center; gap:1rem; }
+.section-header h2 { font-family:'Orbitron',monospace; font-size:1.4rem; font-weight:700; letter-spacing:4px; text-transform:uppercase; color:var(--green); text-shadow:0 0 15px var(--green); }
+.section-line { flex:1; height:1px; background:linear-gradient(90deg,var(--green-dim),transparent); }
+.section-tag { font-size:0.65rem; color:var(--green-dim); letter-spacing:2px; }
+.tag { font-size:0.6rem; padding:0.2rem 0.6rem; border:1px solid var(--green-dark); color:var(--green-dim); letter-spacing:1px; text-transform:uppercase; }
+
+/* TERMINAL */
+.terminal-box { background:var(--bg2); border:1px solid var(--green-dim); border-radius:4px; overflow:hidden; box-shadow:0 0 40px rgba(0,255,65,0.08); }
+.terminal-bar { background:var(--grey); padding:0.5rem 1rem; display:flex; align-items:center; gap:0.5rem; border-bottom:1px solid var(--green-dark); }
+.t-dot { width:10px; height:10px; border-radius:50%; }
+.t-dot.r{background:#ff5f56} .t-dot.y{background:#ffbd2e} .t-dot.g{background:#27c93f}
+.terminal-title { font-size:0.65rem; color:var(--green-dim); margin-left:0.5rem; letter-spacing:1px; }
+.terminal-body { padding:1.5rem; font-size:0.85rem; line-height:2; }
+.t-prompt{color:var(--green-dim)} .t-cmd{color:var(--white)} .t-out{color:var(--green)} .t-hi{color:var(--amber)} .t-err{color:var(--red)} .t-dim{color:#446644}
+.cursor { display:inline-block; width:8px; height:14px; background:var(--green); animation:blink 1s step-end infinite; vertical-align:text-bottom; }
+
+/* HERO */
+#hero { display:flex; align-items:center; min-height:100vh; padding-top:56px; }
+.hero-grid { display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:center; width:100%; }
+.hero-role { font-family:'VT323',monospace; font-size:1.6rem; color:var(--amber); letter-spacing:3px; margin-bottom:1.5rem; text-shadow:0 0 10px var(--amber); }
+.hero-content h1 { font-family:'Orbitron',monospace; font-size:3rem; font-weight:900; line-height:1.1; color:var(--green); text-shadow:0 0 20px rgba(0,255,65,0.5),0 0 40px rgba(0,255,65,0.2); margin-bottom:1rem; }
+.glitch { position:relative; display:inline-block; }
+.glitch::before,.glitch::after { content:attr(data-text); position:absolute; top:0; left:0; width:100%; height:100%; }
+.glitch::before { color:var(--red); animation:glitch1 3s infinite; clip-path:polygon(0 0,100% 0,100% 45%,0 45%); }
+.glitch::after { color:#00ffff; animation:glitch2 3s infinite; clip-path:polygon(0 55%,100% 55%,100% 100%,0 100%); }
+.hero-bio { font-size:0.85rem; color:#88aa88; line-height:1.8; margin-bottom:2rem; max-width:420px; }
+.hero-ctas { display:flex; gap:1rem; flex-wrap:wrap; }
+.btn { font-family:'Share Tech Mono',monospace; font-size:0.75rem; letter-spacing:2px; text-transform:uppercase; padding:0.75rem 1.5rem; border:1px solid var(--green); background:transparent; color:var(--green); cursor:pointer; text-decoration:none; transition:all 0.2s; display:inline-block; }
+.btn:hover { background:var(--green-glow); box-shadow:0 0 20px rgba(0,255,65,0.3); color:var(--white); }
+.btn-outline { border-color:var(--green-dim); color:var(--green-dim); }
+
+/* ABOUT */
+#about { background:linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%); }
+.about-grid { display:grid; grid-template-columns:1fr 1fr; gap:3rem; align-items:start; }
+.card { background:var(--bg2); border:1px solid var(--green-dark); padding:2rem; position:relative; margin-bottom:1.5rem; }
+.card::before { content:''; position:absolute; top:0; left:0; width:3px; height:100%; background:linear-gradient(180deg,var(--green),transparent); }
+.card h3 { font-family:'Orbitron',monospace; font-size:0.8rem; color:var(--amber); letter-spacing:3px; margin-bottom:1.5rem; text-transform:uppercase; }
+.info-row { display:flex; gap:1rem; margin-bottom:0.75rem; font-size:0.82rem; }
+.info-label { color:var(--green-dim); min-width:80px; flex-shrink:0; }
+.info-val { color:var(--white); }
+.bar-wrap { margin-bottom:1rem; }
+.bar-label { display:flex; justify-content:space-between; font-size:0.72rem; color:var(--green-dim); margin-bottom:4px; }
+.bar-bg { background:var(--green-dark); height:6px; overflow:hidden; }
+.bar-fill { height:100%; background:linear-gradient(90deg,var(--green-dim),var(--green)); box-shadow:0 0 8px var(--green); animation:fillBar 1.5s ease-out forwards; }
+.edu-tl { position:relative; padding-left:2rem; }
+.edu-tl::before { content:''; position:absolute; left:0; top:0; bottom:0; width:1px; background:linear-gradient(180deg,var(--green),var(--green-dark),transparent); }
+.edu-item { position:relative; margin-bottom:1.5rem; padding:1.25rem 1.5rem; background:var(--bg); border:1px solid var(--green-dark); border-left:none; }
+.edu-item::before { content:''; position:absolute; left:-2rem; top:50%; transform:translateY(-50%); width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green); }
+.edu-year { font-size:0.65rem; color:var(--red); letter-spacing:2px; margin-bottom:0.4rem; }
+.edu-deg { font-family:'Orbitron',monospace; font-size:0.78rem; color:var(--white); letter-spacing:1px; margin-bottom:0.2rem; }
+.edu-school { font-size:0.72rem; color:var(--green-dim); margin-bottom:0.3rem; }
+.edu-gpa { font-size:0.65rem; color:var(--amber); }
+
+/* SKILLS */
+#skills { background:var(--bg); }
+.skills-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(175px,1fr)); gap:1.5rem; }
+.skill-card { background:var(--bg2); border:1px solid var(--green-dark); padding:1.5rem; text-align:center; transition:all 0.3s; }
+.skill-card:hover { border-color:var(--green); box-shadow:0 0 20px rgba(0,255,65,0.1); transform:translateY(-2px); }
+.skill-icon { font-size:2rem; margin-bottom:0.75rem; }
+.skill-name { font-size:0.72rem; letter-spacing:2px; text-transform:uppercase; color:var(--green-dim); }
+.skill-tag { font-size:0.6rem; color:var(--amber); margin-top:0.25rem; letter-spacing:1px; }
+
+/* EXPERIENCE */
+#experience { background:var(--bg2); }
+.exp-timeline { display:flex; flex-direction:column; }
+.exp-item { display:grid; grid-template-columns:36px 1fr; gap:1.5rem; }
+.exp-connector { display:flex; flex-direction:column; align-items:center; padding-top:1.7rem; }
+.exp-dot { width:12px; height:12px; border-radius:50%; background:var(--green-dark); border:2px solid var(--green-dim); flex-shrink:0; }
+.exp-dot.on { background:var(--green); border-color:var(--green); box-shadow:0 0 10px var(--green); animation:pulse 2s infinite; }
+.exp-line { width:1px; flex:1; background:linear-gradient(180deg,var(--green-dim),var(--green-dark)); margin-top:4px; min-height:30px; }
+.exp-card { background:var(--bg); border:1px solid var(--green-dark); padding:1.5rem; margin-bottom:1.5rem; transition:all 0.3s; position:relative; }
+.exp-card::before { content:''; position:absolute; top:0; left:0; width:3px; height:100%; background:linear-gradient(180deg,var(--green-dim),transparent); opacity:0; transition:opacity 0.3s; }
+.exp-card:hover { border-color:var(--green-dim); }
+.exp-card:hover::before { opacity:1; }
+.exp-head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.25rem; flex-wrap:wrap; gap:0.75rem; }
+.exp-role { font-family:'Orbitron',monospace; font-size:0.85rem; color:var(--white); letter-spacing:2px; margin-bottom:0.3rem; }
+.exp-company { font-size:0.75rem; color:var(--amber); letter-spacing:2px; }
+.exp-meta { display:flex; flex-direction:column; align-items:flex-end; gap:0.4rem; }
+.exp-date { font-size:0.65rem; color:var(--green-dim); letter-spacing:1px; }
+.exp-badge { font-size:0.6rem; padding:0.2rem 0.6rem; border:1px solid; letter-spacing:1px; }
+.exp-badge.on { border-color:var(--green); color:var(--green); animation:pulse 2s infinite; }
+.exp-badge.off { border-color:#446644; color:#446644; }
+.exp-bullets { list-style:none; margin-bottom:1.25rem; display:flex; flex-direction:column; gap:0.6rem; }
+.exp-bullets li { font-size:0.78rem; color:#557755; line-height:1.7; display:flex; gap:0.6rem; }
+.arr { color:var(--green-dim); flex-shrink:0; }
+.exp-tags { display:flex; flex-wrap:wrap; gap:0.4rem; }
+
+/* PROJECTS */
+#projects { background:var(--bg); }
+.projects-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:1.5rem; }
+.project-card { background:var(--bg2); border:1px solid var(--green-dark); overflow:hidden; transition:all 0.3s; }
+.project-card:hover { border-color:var(--green-dim); box-shadow:0 0 30px rgba(0,255,65,0.08); }
+.proj-head { background:var(--grey); padding:1rem 1.5rem; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--green-dark); }
+.proj-id { font-size:0.65rem; color:var(--red); letter-spacing:2px; }
+.proj-status { font-size:0.6rem; color:var(--green); letter-spacing:1px; display:flex; align-items:center; gap:0.4rem; }
+.proj-status::before { content:''; display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--green); box-shadow:0 0 4px var(--green); }
+.proj-body { padding:1.5rem; }
+.proj-body h3 { font-family:'Orbitron',monospace; font-size:0.9rem; color:var(--white); letter-spacing:2px; margin-bottom:0.75rem; }
+.proj-body p { font-size:0.78rem; color:#557755; line-height:1.8; margin-bottom:1.25rem; }
+.proj-tags { display:flex; flex-wrap:wrap; gap:0.4rem; }
+
+/* CERTS */
+#certs { background:var(--bg2); }
+.certs-list { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.cert-item { background:var(--bg); border:1px solid var(--green-dark); padding:1.25rem 1.5rem; display:flex; align-items:center; gap:1rem; transition:all 0.3s; }
+.cert-item:hover { border-color:var(--green-dim); }
+.cert-icon { width:40px; height:40px; border:1px solid var(--green-dim); display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; background:var(--green-dark); }
+.cert-info h4 { font-family:'Orbitron',monospace; font-size:0.72rem; color:var(--white); letter-spacing:1px; margin-bottom:0.25rem; }
+.cert-issuer { font-size:0.65rem; color:var(--green-dim); letter-spacing:1px; }
+.cert-badge { margin-left:auto; font-size:0.6rem; padding:0.2rem 0.6rem; border:1px solid; letter-spacing:1px; flex-shrink:0; }
+.cert-badge.ca { border-color:var(--green); color:var(--green); text-shadow:0 0 6px var(--green); }
+.cert-badge.cp { border-color:var(--amber); color:var(--amber); animation:pulse 2s infinite; }
+
+/* CONTACT */
+#contact { background:var(--bg); padding-bottom:6rem; }
+.contact-grid { display:grid; grid-template-columns:1fr 1fr; gap:3rem; align-items:start; }
+.contact-info h3 { font-family:'Orbitron',monospace; font-size:1rem; color:var(--green); margin-bottom:0.75rem; text-shadow:0 0 10px rgba(0,255,65,0.4); }
+.contact-info p { font-size:0.78rem; color:#557755; line-height:1.8; margin-bottom:2rem; }
+.contact-links { display:flex; flex-direction:column; gap:1rem; }
+.contact-link { display:flex; align-items:center; gap:1rem; font-size:0.8rem; color:var(--green-dim); text-decoration:none; transition:all 0.2s; padding:0.75rem 1rem; border:1px solid var(--green-dark); }
+.contact-link:hover { color:var(--green); border-color:var(--green-dim); background:var(--green-glow); }
+.link-icon { font-size:1.1rem; }
+.link-label { font-size:0.6rem; color:#446644; letter-spacing:1px; }
+.link-text { display:flex; flex-direction:column; gap:0.1rem; }
+
+footer { position:relative; z-index:1; background:var(--bg2); border-top:1px solid var(--green-dark); padding:1.5rem 2rem; display:flex; align-items:center; justify-content:space-between; font-size:0.65rem; color:#335533; letter-spacing:2px; flex-wrap:wrap; gap:0.5rem; }
+
+@media(max-width:768px) {
+  .hero-grid,.about-grid,.contact-grid { grid-template-columns:1fr; }
+  .hero-content h1 { font-size:2rem; }
+  .certs-list { grid-template-columns:1fr; }
+  nav ul { gap:0.75rem; }
+  .nav-status { display:none; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="matrix-canvas"></canvas>
+
+<nav>
+  <div class="nav-logo">U<span>.</span>PATEL<span>_</span></div>
+  <ul>
+    <li><a href="#about">About</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#certs">Certs</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="nav-status"><div class="status-dot"></div>SYSTEM ONLINE</div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-content">
+        <div class="hero-role">&gt; CYBERSECURITY_ANALYST.exe</div>
+        <h1><span class="glitch" data-text="UMANG">UMANG</span><br>PATEL</h1>
+        <p class="hero-bio">Detail-oriented security professional specializing in SOC environments, vulnerability assessment, and incident response. Defending digital perimeters — one threat at a time.</p>
+        <div class="hero-ctas">
+          <a href="#contact" class="btn">&gt; INITIATE_CONTACT</a>
+          <a href="#projects" class="btn btn-outline">&gt; VIEW_PROJECTS</a>
+        </div>
+      </div>
+      <div class="terminal-box">
+        <div class="terminal-bar">
+          <div class="t-dot r"></div><div class="t-dot y"></div><div class="t-dot g"></div>
+          <span class="terminal-title">bash — umang@sec-ops ~ — 80x24</span>
+        </div>
+        <div class="terminal-body">
+          <div><span class="t-prompt">umang@sec-ops:~$ </span><span class="t-cmd">whoami</span></div>
+          <div class="t-out">umang_patel // cybersecurity_analyst</div><br>
+          <div><span class="t-prompt">umang@sec-ops:~$ </span><span class="t-cmd">cat profile.txt</span></div>
+          <div class="t-out">&gt; Location: <span class="t-hi">Toronto, ON</span></div>
+          <div class="t-out">&gt; Role: <span class="t-hi">Cybersecurity Analyst</span></div>
+          <div class="t-out">&gt; Status: <span class="t-hi">ACTIVE @ ElasticCyber</span></div>
+          <div class="t-out">&gt; Cert: <span class="t-hi">Security+_InProgress</span></div><br>
+          <div><span class="t-prompt">umang@sec-ops:~$ </span><span class="t-cmd">nmap --open targets</span></div>
+          <div class="t-dim">Starting Nmap scan...</div>
+          <div class="t-out">&gt; Port 22/tcp &nbsp;<span class="t-hi">open</span> &nbsp;ssh</div>
+          <div class="t-out">&gt; Port 443/tcp <span class="t-hi">open</span> &nbsp;https</div>
+          <div class="t-out">&gt; Port 8080/tcp <span class="t-err">filtered</span> http</div><br>
+          <div><span class="t-prompt">umang@sec-ops:~$ </span><span class="cursor"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="container">
+    <div class="section-header">
+      <h2>// About</h2><div class="section-line"></div><span class="section-tag">ANALYST_PROFILE</span>
+    </div>
+    <div class="about-grid">
+      <div>
+        <div class="card">
+          <h3>// Identity</h3>
+          <div class="info-row"><span class="info-label">NAME:</span><span class="info-val">Umang Patel</span></div>
+          <div class="info-row"><span class="info-label">LOCATION:</span><span class="info-val">Toronto, ON, Canada</span></div>
+          <div class="info-row"><span class="info-label">PHONE:</span><span class="info-val">(249) 989-2957</span></div>
+          <div class="info-row"><span class="info-label">EMAIL:</span><span class="info-val">umangpamol@gmail.com</span></div>
+          <div class="info-row"><span class="info-label">LINKEDIN:</span><span class="info-val">patel--umang</span></div>
+          <div class="info-row"><span class="info-label">STATUS:</span><span class="info-val" style="color:var(--green)">EMPLOYED // OPEN TO OPPS</span></div>
+        </div>
+        <div class="card">
+          <h3>// Education</h3>
+          <div class="edu-tl">
+            <div class="edu-item">
+              <div class="edu-year">2024</div>
+              <div class="edu-deg">Graduate Cert — Cyber Security</div>
+              <div class="edu-school">Georgian College</div>
+              <div class="edu-gpa">Dean's List · 84% Avg</div>
+            </div>
+            <div class="edu-item">
+              <div class="edu-year">2023</div>
+              <div class="edu-deg">Graduate Cert — Big Data Analytics</div>
+              <div class="edu-school">Georgian College</div>
+              <div class="edu-gpa">Dean's List · 84% Avg</div>
+            </div>
+            <div class="edu-item">
+              <div class="edu-year">2021</div>
+              <div class="edu-deg">B.Eng — Information Technology</div>
+              <div class="edu-school">Gujarat Technological University</div>
+              <div class="edu-gpa">CGPA: 9.61 / 10</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <h3>// Proficiency Ratings</h3>
+        <div class="bar-wrap"><div class="bar-label"><span>Security Monitoring & IR</span><span>92%</span></div><div class="bar-bg"><div class="bar-fill" style="width:92%"></div></div></div>
+        <div class="bar-wrap"><div class="bar-label"><span>Vulnerability Assessment</span><span>88%</span></div><div class="bar-bg"><div class="bar-fill" style="width:88%"></div></div></div>
+        <div class="bar-wrap"><div class="bar-label"><span>SIEM & Log Analysis</span><span>85%</span></div><div class="bar-bg"><div class="bar-fill" style="width:85%"></div></div></div>
+        <div class="bar-wrap"><div class="bar-label"><span>Network Scanning (Nmap)</span><span>87%</span></div><div class="bar-bg"><div class="bar-fill" style="width:87%"></div></div></div>
+        <div class="bar-wrap"><div class="bar-label"><span>Windows & Linux Admin</span><span>83%</span></div><div class="bar-bg"><div class="bar-fill" style="width:83%"></div></div></div>
+        <div class="bar-wrap"><div class="bar-label"><span>Firewall & Security Controls</span><span>86%</span></div><div class="bar-bg"><div class="bar-fill" style="width:86%"></div></div></div>
+        <div class="bar-wrap"><div class="bar-label"><span>Data Analysis & Reporting</span><span>80%</span></div><div class="bar-bg"><div class="bar-fill" style="width:80%"></div></div></div>
+        <div class="bar-wrap"><div class="bar-label"><span>Technical Documentation</span><span>84%</span></div><div class="bar-bg"><div class="bar-fill" style="width:84%"></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="container">
+    <div class="section-header">
+      <h2>// Skills</h2><div class="section-line"></div><span class="section-tag">ARSENAL</span>
+    </div>
+    <div class="skills-grid">
+      <div class="skill-card"><div class="skill-icon">🛡️</div><div class="skill-name">SOC Operations</div><div class="skill-tag">CORE</div></div>
+      <div class="skill-card"><div class="skill-icon">🔍</div><div class="skill-name">SIEM & Log Analysis</div><div class="skill-tag">CORE</div></div>
+      <div class="skill-card"><div class="skill-icon">🌐</div><div class="skill-name">Network Scanning</div><div class="skill-tag">NMAP</div></div>
+      <div class="skill-card"><div class="skill-icon">⚠️</div><div class="skill-name">Vuln Assessment</div><div class="skill-tag">RISK</div></div>
+      <div class="skill-card"><div class="skill-icon">🐧</div><div class="skill-name">Linux / Kali</div><div class="skill-tag">OS</div></div>
+      <div class="skill-card"><div class="skill-icon">🪟</div><div class="skill-name">Windows Server</div><div class="skill-tag">OS</div></div>
+      <div class="skill-card"><div class="skill-icon">🔥</div><div class="skill-name">Firewall Rules</div><div class="skill-tag">INFRA</div></div>
+      <div class="skill-card"><div class="skill-icon">☁️</div><div class="skill-name">AWS Cloud Security</div><div class="skill-tag">CLOUD</div></div>
+      <div class="skill-card"><div class="skill-icon">🎯</div><div class="skill-name">Incident Response</div><div class="skill-tag">CORE</div></div>
+      <div class="skill-card"><div class="skill-icon">📊</div><div class="skill-name">Big Data Analytics</div><div class="skill-tag">DATA</div></div>
+      <div class="skill-card"><div class="skill-icon">📋</div><div class="skill-name">Security Reports</div><div class="skill-tag">DOCS</div></div>
+      <div class="skill-card"><div class="skill-icon">🔐</div><div class="skill-name">Data Protection</div><div class="skill-tag">POLICY</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="container">
+    <div class="section-header">
+      <h2>// Experience</h2><div class="section-line"></div><span class="section-tag">DEPLOYMENT_LOG</span>
+    </div>
+    <div class="exp-timeline">
+
+      <div class="exp-item">
+        <div class="exp-connector"><div class="exp-dot on"></div><div class="exp-line"></div></div>
+        <div class="exp-card">
+          <div class="exp-head">
+            <div><div class="exp-role">Cybersecurity Analyst</div><div class="exp-company">Elasticyber Intellectuals</div></div>
+            <div class="exp-meta"><span class="exp-date">Sep 2025 — Present</span><span class="exp-badge on">ACTIVE</span></div>
+          </div>
+          <ul class="exp-bullets">
+            <li><span class="arr">&gt;</span>Identify, assess, and mitigate security risks while ensuring strict adherence to data protection policies and procedures.</li>
+            <li><span class="arr">&gt;</span>Collaborate with cross-functional teams to resolve security issues, communicate insights clearly, and support informed decision-making.</li>
+            <li><span class="arr">&gt;</span>Leverage digital tools and analytics to monitor performance, improve processes, and enhance service reliability and client confidence.</li>
+          </ul>
+          <div class="exp-tags"><span class="tag">Risk Assessment</span><span class="tag">Data Protection</span><span class="tag">Security Monitoring</span><span class="tag">Analytics</span></div>
+        </div>
+      </div>
+
+      <div class="exp-item">
+        <div class="exp-connector"><div class="exp-dot"></div><div class="exp-line"></div></div>
+        <div class="exp-card">
+          <div class="exp-head">
+            <div><div class="exp-role">Course Tutor — Computer Studies</div><div class="exp-company">Georgian College</div></div>
+            <div class="exp-meta"><span class="exp-date">Sep 2024 — Dec 2024</span><span class="exp-badge off">COMPLETED</span></div>
+          </div>
+          <ul class="exp-bullets">
+            <li><span class="arr">&gt;</span>Guided students in Cybersecurity, Big Data Analytics, and IT fundamentals, contributing to measurably improved academic outcomes.</li>
+            <li><span class="arr">&gt;</span>Troubleshot technical issues related to software, hardware, and networking during one-on-one and group tutoring sessions.</li>
+            <li><span class="arr">&gt;</span>Delivered practical demonstrations of programming concepts, data analysis techniques, and cybersecurity fundamentals.</li>
+          </ul>
+          <div class="exp-tags"><span class="tag">Cybersecurity</span><span class="tag">Big Data</span><span class="tag">Networking</span><span class="tag">Teaching</span></div>
+        </div>
+      </div>
+
+      <div class="exp-item">
+        <div class="exp-connector"><div class="exp-dot"></div></div>
+        <div class="exp-card">
+          <div class="exp-head">
+            <div><div class="exp-role">Computer Studies Support Assistant</div><div class="exp-company">Georgian College</div></div>
+            <div class="exp-meta"><span class="exp-date">Sep 2024 — Dec 2024</span><span class="exp-badge off">COMPLETED</span></div>
+          </div>
+          <ul class="exp-bullets">
+            <li><span class="arr">&gt;</span>Diagnosed and resolved technical problems in computer labs, including hardware and software troubleshooting.</li>
+            <li><span class="arr">&gt;</span>Configured and managed educational tools and environments, ensuring seamless functionality for academic use.</li>
+            <li><span class="arr">&gt;</span>Delivered exceptional customer service with professionalism and empathy when addressing student concerns.</li>
+          </ul>
+          <div class="exp-tags"><span class="tag">Hardware</span><span class="tag">Troubleshooting</span><span class="tag">Lab Management</span><span class="tag">Support</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="container">
+    <div class="section-header">
+      <h2>// Projects</h2><div class="section-line"></div><span class="section-tag">OPS_LOG</span>
+    </div>
+    <div class="projects-grid">
+      <div class="project-card">
+        <div class="proj-head"><span class="proj-id">OP-001</span><span class="proj-status">COMPLETED</span></div>
+        <div class="proj-body">
+          <h3>SOC Simulation Lab</h3>
+          <p>Designed and deployed a full simulated Security Operations Center using Kali Linux, Windows Server, Metasploitable3 and SIEM tooling. Conducted network scanning, vuln assessment, and log analysis to identify IOCs.</p>
+          <div class="proj-tags"><span class="tag">Kali Linux</span><span class="tag">SIEM</span><span class="tag">Metasploitable</span><span class="tag">Incident Response</span><span class="tag">Log Analysis</span></div>
+        </div>
+      </div>
+      <div class="project-card">
+        <div class="proj-head"><span class="proj-id">OP-002</span><span class="proj-status">COMPLETED</span></div>
+        <div class="proj-body">
+          <h3>ADatum Corp Security Upgrade</h3>
+          <p>Led a comprehensive cybersecurity overhaul featuring centralized ADMX policy repository and advanced Windows Defender Firewall rules on Windows Server 2022 and Windows 11. Significantly hardened research data assets.</p>
+          <div class="proj-tags"><span class="tag">Windows Server 2022</span><span class="tag">ADMX Policy</span><span class="tag">Firewall</span><span class="tag">Windows 11</span></div>
+        </div>
+      </div>
+      <div class="project-card">
+        <div class="proj-head"><span class="proj-id">OP-003</span><span class="proj-status">COMPLETED</span></div>
+        <div class="proj-body">
+          <h3>VR + Anatomy — Data Analysis</h3>
+          <p>Spearheaded the data analysis component of a VR integration research project at Georgian College. Applied advanced statistical methods showing a 25% improvement in student comprehension and retention.</p>
+          <div class="proj-tags"><span class="tag">Data Analysis</span><span class="tag">Statistics</span><span class="tag">Research</span><span class="tag">Python</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CERTS -->
+<section id="certs">
+  <div class="container">
+    <div class="section-header">
+      <h2>// Certifications</h2><div class="section-line"></div><span class="section-tag">CREDENTIALS</span>
+    </div>
+    <div class="certs-list">
+      <div class="cert-item"><div class="cert-icon">🔒</div><div class="cert-info"><h4>CompTIA Security+</h4><span class="cert-issuer">CompTIA</span></div><span class="cert-badge cp">IN PROGRESS</span></div>
+      <div class="cert-item"><div class="cert-icon">🧑‍💼</div><div class="cert-info"><h4>Cybersecurity Analyst Simulation</h4><span class="cert-issuer">Tata · Forage</span></div><span class="cert-badge ca">ACTIVE</span></div>
+      <div class="cert-item"><div class="cert-icon">☁️</div><div class="cert-info"><h4>AWS Cloud Security Foundations</h4><span class="cert-issuer">AWS Academy</span></div><span class="cert-badge ca">ACTIVE</span></div>
+      <div class="cert-item"><div class="cert-icon">⚡</div><div class="cert-info"><h4>AWS Cloud Technical Essentials</h4><span class="cert-issuer">Amazon Web Services</span></div><span class="cert-badge ca">ACTIVE</span></div>
+      <div class="cert-item"><div class="cert-icon">🔶</div><div class="cert-info"><h4>OCI Certified Architect Associate</h4><span class="cert-issuer">Oracle Cloud · 2019</span></div><span class="cert-badge ca">ACTIVE</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="container">
+    <div class="section-header">
+      <h2>// Contact</h2><div class="section-line"></div><span class="section-tag">ESTABLISH_COMMS</span>
+    </div>
+    <div class="contact-grid">
+      <div class="terminal-box">
+        <div class="terminal-bar">
+          <div class="t-dot r"></div><div class="t-dot y"></div><div class="t-dot g"></div>
+          <span class="terminal-title">contact.sh</span>
+        </div>
+        <div class="terminal-body">
+          <div><span class="t-prompt">$ </span><span class="t-cmd">ping umang_patel</span></div><br>
+          <div class="t-out">PING umang_patel (Toronto, ON)</div>
+          <div class="t-out">64 bytes: icmp_seq=1 <span class="t-hi">ttl=64 time=0.1ms</span></div>
+          <div class="t-out">64 bytes: icmp_seq=2 <span class="t-hi">ttl=64 time=0.1ms</span></div><br>
+          <div class="t-out">— ping statistics —</div>
+          <div class="t-out">transmitted=2 received=2</div>
+          <div class="t-out"><span class="t-hi">packet_loss=0%</span> // always available</div><br>
+          <div><span class="t-prompt">$ </span><span class="cursor"></span></div>
+        </div>
+      </div>
+      <div class="contact-info">
+        <h3>// Open Channel</h3>
+        <p>Looking to collaborate, hire, or discuss cybersecurity? Establish a secure connection below.</p>
+        <div class="contact-links">
+          <a href="mailto:umangpamol@gmail.com" class="contact-link">
+            <span class="link-icon">✉️</span>
+            <div class="link-text"><span>umangpamol@gmail.com</span><span class="link-label">EMAIL // PRIMARY CHANNEL</span></div>
+          </a>
+          <a href="tel:+12499892957" class="contact-link">
+            <span class="link-icon">📞</span>
+            <div class="link-text"><span>(249) 989-2957</span><span class="link-label">PHONE // TORONTO, ON</span></div>
+          </a>
+          <a href="https://linkedin.com/in/patel--umang" target="_blank" class="contact-link">
+            <span class="link-icon">🔗</span>
+            <div class="link-text"><span>linkedin.com/in/patel--umang</span><span class="link-label">LINKEDIN // PROFESSIONAL NETWORK</span></div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>© 2025 UMANG PATEL // CYBERSECURITY ANALYST</span>
+  <span>BUILD: V2.0.0 // TORONTO, ON</span>
+  <span>ALL SYSTEMS NOMINAL</span>
+</footer>
+
+<script>
+const canvas = document.getElementById('matrix-canvas');
+const ctx = canvas.getContext('2d');
+function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+resize();
+window.addEventListener('resize', resize);
+const chars = 'アイウエオ0123456789ABCDEF<>{}[]//';
+let drops = [];
+function initDrops() { drops = Array(Math.floor(canvas.width/16)).fill(1); }
+initDrops();
+window.addEventListener('resize', initDrops);
+setInterval(() => {
+  ctx.fillStyle = 'rgba(2,10,2,0.05)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#00ff41';
+  ctx.font = '14px monospace';
+  for (let i = 0; i < drops.length; i++) {
+    ctx.fillText(chars[Math.floor(Math.random()*chars.length)], i*16, drops[i]*16);
+    if (drops[i]*16 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+    drops[i]++;
+  }
+}, 50);
+</script>
+</body>
+</html>
