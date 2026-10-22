@@ -62,7 +62,7 @@ li .t{flex:1 1 260px}li small{display:block;color:#5A6675}
     <section class="row" style="justify-content:space-between"><span id="count"></span><button id="csv" class="ghost">Export subscribers (CSV)</button></section>
   </div>
 </main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.min.js"></script>
 <script src="config.js"></script>
 <script>
 (function(){
@@ -71,7 +71,7 @@ function say(t,bad){$('msg').textContent=t;$('msg').className=bad?'bad':'ok'}
 function slug(t){return t.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,60)+'-'+Math.random().toString(36).slice(2,6)}
 async function session(){return (await sb.auth.getSession()).data.session}
 async function show(){var s=await session();$('login').hidden=!!s;$('panel').hidden=!s;$('out').hidden=!s;if(s)load()}
-$('login').onsubmit=async function(e){e.preventDefault();var r=await sb.auth.signInWithPassword({email:$('em').value,password:$('pw').value});$('lmsg').textContent=r.error?r.error.message:'';show()};
+$('login').onsubmit=async function(e){e.preventDefault();var r=await sb.auth.signInWithPassword({email:$('em').value,password:$('pw').value});$('lmsg').textContent=r.error?(/fetch/i.test(r.error.message)?'Could not reach the server. Try another browser or turn off ad/tracker blockers for this site.':r.error.message):'';show()};
 $('out').onclick=async function(){await sb.auth.signOut();show()};
 
 async function sendEmail(id){
