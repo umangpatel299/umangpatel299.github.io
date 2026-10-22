@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>NOLRO — Bulletin admin</title>
+<link rel="icon" href="logo.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#F5F4F0;color:#141C26;font-family:'IBM Plex Sans','Helvetica Neue',sans-serif;line-height:1.5}
+header{background:#fff;border-bottom:1px solid #E3E1DA;padding:0 clamp(16px,4vw,48px);min-height:80px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+header img{height:56px;display:block}
+main{max-width:860px;margin:0 auto;padding:clamp(24px,5vw,56px) clamp(16px,4vw,32px);display:flex;flex-direction:column;gap:40px}
+h1,h2{font-family:'Source Serif 4',Georgia,serif;font-weight:500;margin:0}
+h2{font-size:26px}
+.box{background:#fff;border:1px solid #E3E1DA;border-top:4px solid #E0A93B;padding:clamp(20px,4vw,40px);display:flex;flex-direction:column;gap:18px}
+label{font-weight:600;font-size:14px;display:flex;flex-direction:column;gap:6px}
+input,select,textarea{font:inherit;font-weight:400;padding:12px 14px;border:1px solid #9AA3AE;background:#fff;border-radius:0;transition:border-color .2s,box-shadow .2s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#0E1B2C;box-shadow:0 0 0 3px rgba(224,169,59,.4)}
+textarea{min-height:220px;resize:vertical}
+.chk{flex-direction:row;align-items:center;gap:10px;font-weight:500}.chk input{width:20px;height:20px;padding:0}
+button{font:inherit;font-weight:600;padding:14px 26px;border:0;background:#0E1B2C;color:#fff;cursor:pointer;transition:background-color .25s,color .25s,transform .2s}
+button:hover:not(:disabled){background:#E0A93B;color:#0E1B2C}button:active{transform:scale(.98)}button:disabled{opacity:.6;cursor:wait}
+button.ghost{background:transparent;color:#0E1B2C;border:1px solid #9AA3AE;padding:8px 14px;font-size:14px}
+button.ghost:hover:not(:disabled){background:#0E1B2C;color:#fff}
+.ok{color:#1D6B3A}.bad{color:#B3261E}#msg,#lmsg{margin:0;font-weight:500;min-height:22px}
+ul{list-style:none;margin:0;padding:0;background:#fff;border:1px solid #E3E1DA}
+li{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;padding:16px 20px;border-bottom:1px solid #E3E1DA}li:last-child{border:0}
+li .t{flex:1 1 260px}li small{display:block;color:#5A6675}
+.tag{font-size:12px;font-weight:600;padding:3px 8px;background:#E7F3EA;color:#1D6B3A}.tag.no{background:#F5F4F0;color:#5A6675}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header><img src="logo.png" alt="NOLRO"><button id="out" class="ghost" hidden>Sign out</button></header>
+<main>
+  <form id="login" class="box" style="max-width:440px;margin:0 auto;width:100%">
+    <h1 style="font-size:30px">Admin sign in</h1>
+    <label>Email<input id="em" type="email" required autocomplete="username"></label>
+    <label>Password<input id="pw" type="password" required autocomplete="current-password"></label>
+    <button type="submit">Sign in</button><p id="lmsg" class="bad"></p>
+  </form>
+
+  <div id="panel" hidden style="display:flex;flex-direction:column;gap:40px">
+    <form id="post" class="box">
+      <h2>New bulletin</h2>
+      <label>Title<input id="title" required maxlength="140"></label>
+      <label>Category<select id="cat"><option>Notice</option><option>Local conditions</option><option>ICI bargaining</option><option>Project update</option></select></label>
+      <label>Short summary (shown on the site and in the email)<input id="sum" required maxlength="220"></label>
+      <label>Full article (leave a blank line between paragraphs)<textarea id="body" required></textarea></label>
+      <label>Picture (JPG, PNG or WebP, under 5 MB)<input id="img" type="file" accept="image/jpeg,image/png,image/webp"></label>
+      <label class="chk"><input id="mail" type="checkbox" checked> Email this to confirmed subscribers</label>
+      <div class="row"><button id="go" type="submit">Publish</button></div>
+      <p id="msg" role="status"></p>
+    </form>
+
+    <section style="display:flex;flex-direction:column;gap:16px"><h2>Published bulletins</h2><ul id="list"></ul></section>
+
+    <section class="row" style="justify-content:space-between"><span id="count"></span><button id="csv" class="ghost">Export subscribers (CSV)</button></section>
+  </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script>
+(function(){
+var C=window.NOLRO,sb=supabase.createClient(C.SUPABASE_URL,C.SUPABASE_ANON_KEY),$=function(i){return document.getElementById(i)};
+function say(t,bad){$('msg').textContent=t;$('msg').className=bad?'bad':'ok'}
+function slug(t){return t.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,60)+'-'+Math.random().toString(36).slice(2,6)}
+async function session(){return (await sb.auth.getSession()).data.session}
+async function show(){var s=await session();$('login').hidden=!!s;$('panel').hidden=!s;$('out').hidden=!s;if(s)load()}
+$('login').onsubmit=async function(e){e.preventDefault();var r=await sb.auth.signInWithPassword({email:$('em').value,password:$('pw').value});$('lmsg').textContent=r.error?r.error.message:'';show()};
+$('out').onclick=async function(){await sb.auth.signOut();show()};
+
+async function sendEmail(id){
+  var s=await session();
+  var r=await fetch(C.SUPABASE_URL+'/functions/v1/newsletter',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+s.access_token,apikey:C.SUPABASE_ANON_KEY},body:JSON.stringify({action:'send',id:id})});
+  return r.json();
+}
+function result(r){return r.ok?' Emailed to '+r.sent+' subscriber'+(r.sent===1?'':'s')+'.':' Email not sent: '+r.error}
+
+$('post').onsubmit=async function(e){
+  e.preventDefault();var b=$('go');b.disabled=true;say('Publishing…');
+  try{
+    var image_url=null,f=$('img').files[0];
+    if(f){
+      if(!/^image\/(jpeg|png|webp)$/.test(f.type)||f.size>5e6)throw Error('The picture must be a JPG, PNG or WebP under 5 MB.');
+      var path=Date.now()+'-'+f.name.replace(/[^\w.-]/g,'_');
+      var up=await sb.storage.from('article-images').upload(path,f,{contentType:f.type});if(up.error)throw up.error;
+      image_url=sb.storage.from('article-images').getPublicUrl(path).data.publicUrl;
+    }
+    var ins=await sb.from('articles').insert({slug:slug($('title').value),title:$('title').value.trim(),category:$('cat').value,summary:$('sum').value.trim(),body:$('body').value.trim(),image_url:image_url}).select('id').single();
+    if(ins.error)throw ins.error;
+    var note='Published on the website.';
+    if($('mail').checked)note+=result(await sendEmail(ins.data.id));
+    say(note);$('post').reset();$('mail').checked=true;load();
+  }catch(err){say(err.message,true)}
+  b.disabled=false;
+};
+
+async function load(){
+  var r=await sb.from('articles').select('id,title,created_at,emailed_at').order('created_at',{ascending:false});
+  var ul=$('list');ul.innerHTML='';
+  (r.data||[]).forEach(function(a){
+    var li=document.createElement('li'),t=document.createElement('div'),n=document.createElement('strong'),sm=document.createElement('small');
+    t.className='t';n.textContent=a.title;sm.textContent=new Date(a.created_at).toLocaleDateString('en-CA',{dateStyle:'long'});t.append(n,sm);
+    var row=document.createElement('div'),tag=document.createElement('span');row.className='row';
+    tag.className='tag'+(a.emailed_at?'':' no');tag.textContent=a.emailed_at?'Emailed':'Not emailed';row.appendChild(tag);
+    if(!a.emailed_at){var m=document.createElement('button');m.className='ghost';m.textContent='Email subscribers';
+      m.onclick=async function(){if(!confirm('Email "'+a.title+'" to all confirmed subscribers?'))return;m.disabled=true;say('Sending…');say('Done.'+result(await sendEmail(a.id)));load()};row.appendChild(m)}
+    var d=document.createElement('button');d.className='ghost';d.textContent='Delete';
+    d.onclick=async function(){if(!confirm('Delete "'+a.title+'" from the website? This cannot be undone.'))return;await sb.from('articles').delete().eq('id',a.id);load()};
+    row.appendChild(d);li.append(t,row);ul.appendChild(li);
+  });
+  if(!ul.children.length){var e=document.createElement('li');e.textContent='Nothing published yet.';ul.appendChild(e)}
+  var s=await sb.from('subscribers').select('email,confirmed,created_at');window._subs=s.data||[];
+  $('count').textContent=window._subs.filter(function(x){return x.confirmed}).length+' confirmed subscribers ('+window._subs.length+' total)';
+}
+$('csv').onclick=function(){
+  var rows=['email,confirmed,subscribed_on'].concat((window._subs||[]).map(function(x){return [x.email,x.confirmed,x.created_at.slice(0,10)].join(',')}));
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv'}));a.download='subscribers.csv';a.click();
+};
+show();
+})();
+</script>
+</body>
+</html>

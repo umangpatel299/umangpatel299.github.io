@@ -221,6 +221,10 @@ a[style*="170px 150px 200px"]:hover>span:nth-of-type(1){color:#AEB9C7!important}
 a[style*="170px 150px 200px"]:hover>span:nth-of-type(2){color:#E0A93B!important}
 a[style*="170px 150px 200px"]:hover>svg{stroke:#E0A93B!important}
 
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.subscribe button:hover{background:#fff!important;color:#0E1B2C!important;box-shadow:0 12px 26px rgba(0,0,0,.35)!important}
+.subscribe button:disabled{opacity:.6;cursor:wait}
+@media (max-width:600px){.subscribe{padding:28px 20px!important}.sub-row{flex-direction:column}.sub-row input{border-right:1px solid #9AA3AE!important}}
 /* back to top */
 .to-top{position:fixed;right:max(20px,env(safe-area-inset-right));bottom:max(20px,env(safe-area-inset-bottom));z-index:90;width:48px;height:48px;border:0;padding:0;background:#0E1B2C;color:#E0A93B;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 10px 24px rgba(14,27,44,.3);opacity:0;visibility:hidden;transform:translateY(12px);transition:opacity .3s var(--ease),transform .3s var(--ease),visibility .3s,background-color .25s}
 .to-top.show{opacity:1;visibility:visible;transform:none}
@@ -249,6 +253,7 @@ a[style*="170px 150px 200px"]:hover>svg{stroke:#E0A93B!important}
 <a href="https://www.clrao.ca" style="color: #AEB9C7;">Collective Agreement Library</a>
 <span style="color: #AEB9C7;">[(###) ###-####]</span>
 <a href="#" style="color: #E0A93B; font-weight: 600;">Member Login</a>
+<a href="admin.html" style="color: #AEB9C7; border: 1px solid #3A4D66; padding: 4px 14px; font-weight: 600;">Admin</a>
 </div>
 </div>
 
@@ -485,9 +490,9 @@ a[style*="170px 150px 200px"]:hover>svg{stroke:#E0A93B!important}
 <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: #8A5A00;">05 — Bulletins</span>
 <h2 style="margin: 0; font-family: 'Source Serif 4', Georgia, serif; font-size: 52px; font-weight: 500; line-height: 1.08; letter-spacing: -0.5px;">Latest for contractors</h2>
 </div>
-<a href="#" style="display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 16px; color: #8A5A00;">View all bulletins →</a>
+<a href="article.html" style="display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 16px; color: #8A5A00;">View all bulletins →</a>
 </div>
-<div style="display: flex; flex-direction: column; border-top: 2px solid #0E1B2C;">
+<div id="article-list" style="display: flex; flex-direction: column; border-top: 2px solid #0E1B2C;">
 <a href="#" style="display: grid; grid-template-columns: 170px 150px 200px minmax(0, 1fr) 40px; align-items: center; gap: 28px; padding: 26px 0; border-bottom: 1px solid #D5D2C8; color: #141C26;">
 <img src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&amp;fit=crop&amp;w=600&amp;q=80" alt="" style="width: 170px; height: 104px; object-fit: cover; display: block;">
 <span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: #5A6675;">[DATE]</span>
@@ -510,6 +515,23 @@ a[style*="170px 150px 200px"]:hover>svg{stroke:#E0A93B!important}
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0E1B2C" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
 </a>
 </div>
+
+<form id="subscribe" class="subscribe" novalidate style="background: #0E1B2C; color: #FFFFFF; padding: 40px 44px; border-top: 4px solid #E0A93B; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px 48px;">
+<div style="flex: 1 1 320px; display: flex; flex-direction: column; gap: 8px;">
+<span style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #E0A93B; font-weight: 600;">Bulletin email</span>
+<span style="font-family: 'Source Serif 4', Georgia, serif; font-size: 28px; font-weight: 500; line-height: 1.2;">Get new bulletins in your inbox.</span>
+<span style="font-size: 14px; color: #AEB9C7;">By subscribing you agree to receive NOLRO bulletins by email. You can unsubscribe at any time.</span>
+</div>
+<div style="flex: 1 1 380px; display: flex; flex-direction: column; gap: 10px;">
+<div class="sub-row" style="display: flex;">
+<label for="nl-email" class="sr">Email address</label>
+<input id="nl-email" type="email" required placeholder="you@company.com" autocomplete="email" style="flex-grow: 1; min-width: 0; height: 56px; box-sizing: border-box; padding: 0 18px; border: 1px solid #9AA3AE; border-right: 0; font-size: 16px; background: #FFFFFF; color: #141C26;">
+<button type="submit" style="height: 56px; padding: 0 28px; background: #E0A93B; color: #0E1B2C; border: 0; font-size: 16px; font-weight: 600; cursor: pointer;">Subscribe</button>
+</div>
+<input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position: absolute; left: -9999px;">
+<p id="nl-msg" role="status" style="margin: 0; font-size: 14px; min-height: 20px; color: #E0A93B;"></p>
+</div>
+</form>
 </section>
 
 <section id="contact" style="box-sizing: border-box; padding: 120px 80px; background: #F5F4F0; border-top: 1px solid #E3E1DA; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px;">
@@ -575,7 +597,7 @@ a[style*="170px 150px 200px"]:hover>svg{stroke:#E0A93B!important}
 </div>
 <div style="border-top: 1px solid #1E2C40; padding-top: 28px; font-size: 14px; display: flex; justify-content: space-between; align-items: center;">
 <span>© [YEAR] Northwestern Ontario Labour Relations Organization. All rights reserved.</span>
-<div style="display: flex; gap: 28px;"><a href="#" style="color: #AEB9C7;">Privacy</a><a href="#" style="color: #AEB9C7;">Accessibility (AODA)</a><a href="#" style="color: #AEB9C7;">Terms</a></div>
+<div style="display: flex; gap: 28px;"><a href="#" style="color: #AEB9C7;">Privacy</a><a href="#" style="color: #AEB9C7;">Accessibility (AODA)</a><a href="#" style="color: #AEB9C7;">Terms</a><a href="admin.html" style="color: #AEB9C7;">Admin login</a></div>
 </div>
 </footer>
 
@@ -658,5 +680,7 @@ groups.forEach(function(sel){
 });
 })();
 </script>
+<script src="config.js"></script>
+<script src="news.js"></script>
 </body>
 </html>
